@@ -43,10 +43,12 @@ fn main() {
                         paralyzed_turns += 1;
                     }
                 }
-                let mut most_paralyzed_turns_local = most_paralyzed_turns.lock().unwrap();
-                if paralyzed_turns > *most_paralyzed_turns_local {
-                    *most_paralyzed_turns_local = paralyzed_turns;
-                }  
+                {
+                    let mut most_paralyzed_turns_local = most_paralyzed_turns.lock().unwrap();
+                    if paralyzed_turns > *most_paralyzed_turns_local {
+                        *most_paralyzed_turns_local = paralyzed_turns;
+                    }
+                }
                 {
                     let mut played_battles_local = played_battles.lock().unwrap();
                     battle = played_battles_local.clone();
