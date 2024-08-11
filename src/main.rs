@@ -1,9 +1,24 @@
 use std::{
-    io::stdin, sync::{Arc, Mutex}, thread::{self, JoinHandle}, time::{Duration, Instant}
+    io::stdin, sync::{Arc, Mutex, MutexGuard}, thread::{self, JoinHandle}, time::{Duration, Instant}
 };
 use rand::{thread_rng, Rng};
 
 fn main() {
+    fn increment_played_battles(mut played_battles: MutexGuard<u32>, battles: u32) -> Option<()> {
+        if *played_battles >= battles {
+            return None;
+        }
+        *played_battles += 1;
+        return Some(())
+    }
+
+    fn update_most_paralyzed_turns(mut most_paralyzed_turns: MutexGuard<u8>, update_value: u8) {
+        if *most_paralyzed_turns >= update_value {
+            return;
+        }
+        *most_paralyzed_turns = update_value.clone();
+    }
+
     println!("How many battles would you like to attempt?");
     let mut buf: String = "".to_owned();
     stdin().read_line(&mut buf).unwrap();
@@ -24,39 +39,16 @@ fn main() {
         let played_battles = Arc::clone(&played_battles);
         let most_paralyzed_turns = Arc::clone(&most_paralyzed_turns);
 
-
         let thread: JoinHandle<()> = thread::spawn(move || {
             let mut rng = thread_rng();
-            let mut battle: u32;
-            {
-                let mut played_battles_local = played_battles.lock().unwrap();
-                battle = played_battles_local.clone();
-                if battle >= battles {
-                    return;
-                }
-                *played_battles_local += 1;
-            }
-            while battle < battles && {*most_paralyzed_turns.lock().unwrap() < 177} {
+            while increment_played_battles(played_battles.lock().unwrap(), battles).is_some() && {*most_paralyzed_turns.lock().unwrap() < 177} {
                 let mut paralyzed_turns: u8 = 0;
                 for _ in 0..231 {
                     if rng.gen_range(0..4 as u8) == 0 {
                         paralyzed_turns += 1;
                     }
                 }
-                {
-                    let mut most_paralyzed_turns_local = most_paralyzed_turns.lock().unwrap();
-                    if paralyzed_turns > *most_paralyzed_turns_local {
-                        *most_paralyzed_turns_local = paralyzed_turns;
-                    }
-                }
-                {
-                    let mut played_battles_local = played_battles.lock().unwrap();
-                    battle = played_battles_local.clone();
-                    if battle >= battles {
-                        return;
-                    }
-                    *played_battles_local += 1;
-                }
+                update_most_paralyzed_turns(most_paralyzed_turns.lock().unwrap(), paralyzed_turns)
             }
         });
 
