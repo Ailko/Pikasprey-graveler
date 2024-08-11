@@ -12,5 +12,6 @@ Because I've improved this code many times (and submitted many times, my apologi
 > [!NOTE]
 > For reference, the multithreaded versions always ran with 16 threads so at no point was the amount of threads changed.
 
-This constitutes a [99.99%](## "99.9941222112478%") improvement over Austin's code (so far) ;).
+This constitutes a 99.99% [^1] improvement over Austin's code (so far) ;).
 
+[^1]: 99.9941222112478%
